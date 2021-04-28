@@ -49,6 +49,9 @@ class MainDrawer extends StatelessWidget {
           buildListTile('Orders', Icons.access_time, () {
             Navigator.of(context).pushNamed('/orders');
           }),
+          buildListTile('Manage products', Icons.edit, () {
+            Navigator.of(context).pushNamed('/user-products');
+          }),
         ],
       ),
     );
