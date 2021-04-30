@@ -1,6 +1,6 @@
 {
-    "name": "new_shop_app",
-    "short_name": "new_shop_app",
+    "name": "shop_app_3",
+    "short_name": "shop_app_3",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
