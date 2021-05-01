@@ -85,12 +85,8 @@ class Products with ChangeNotifier {
     //   isFavorite: false,
     // )
   ];
-  // var _showFavoritesOnly = false;
 
   List<Product> get items {
-    // if (_showFavoritesOnly) {
-    //   return _items.where((prodItem) => prodItem.isFavorite).toList();
-    // }
     return [..._items];
   }
 
@@ -102,20 +98,9 @@ class Products with ChangeNotifier {
     return _items.firstWhere((prod) => prod.id == id);
   }
 
-  // void showFavoritesOnly() {
-  //   _showFavoritesOnly = true;
-  //   notifyListeners();
-  // }
-
-  // void showAll() {
-  //   _showFavoritesOnly = false;
-  //   notifyListeners();
-  // }
-
   Future<void> addProduct(Product product) async {
     final url = Uri.parse(
         'https://flutter-shop-app-7c5ec-default-rtdb.europe-west1.firebasedatabase.app/products.json');
-    //await - мы ждем, пока заверится исполнение этого V куска кода,
     try {
       final response = await http.post(
         url,
@@ -135,7 +120,6 @@ class Products with ChangeNotifier {
         id: json.decode(response.body)['name'],
       );
       _items.add(newProduct);
-      // _items.insert(0, newProduct); // at the start of the list
       notifyListeners();
     } catch (error) {
       print(error);
@@ -143,9 +127,22 @@ class Products with ChangeNotifier {
     }
   }
 
-  void updateProduct(String id, Product newProduct) {
+  Future<void> updateProduct(String id, Product newProduct) async {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
     if (prodIndex >= 0) {
+      final url = Uri.parse(
+          'https://flutter-shop-app-7c5ec-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json');
+      await http.patch(
+        url,
+        body: json.encode(
+          {
+            'title': newProduct.title,
+            'description': newProduct.description,
+            'imageUrl': newProduct.imageUrl,
+            'price': newProduct.price
+          },
+        ),
+      );
       _items[prodIndex] = newProduct;
       notifyListeners();
     } else {
@@ -182,8 +179,16 @@ class Products with ChangeNotifier {
     }
   }
 
-  void deleteProduct(String id) {
-    _items.removeWhere((prod) => prod.id == id);
+  Future<void> deleteProduct(String id) async {
+    final url = Uri.parse(
+        'https://flutter-shop-app-7c5ec-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json');
+    try {
+      await http.delete(url);
+      await fetchAndSetProducts();
+      notifyListeners();
+    } catch (error) {
+      print('Какая-то ошибка в providers/products/deleteProduct');
+    }
     notifyListeners();
   }
 }
