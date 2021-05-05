@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import '../models/http_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -12,17 +12,24 @@ class Auth with ChangeNotifier {
   Future<void> _authenticator(
       String email, String password, String urlSpec) async {
     final url = Uri.parse(urlSpec);
-    final response = await http.post(
-      url,
-      body: json.encode(
-        {
-          'email': email,
-          'password': password,
-          'returnSecureToken': true,
-        },
-      ),
-    );
-    print(json.decode(response.body));
+    try {
+      final response = await http.post(
+        url,
+        body: json.encode(
+          {
+            'email': email,
+            'password': password,
+            'returnSecureToken': true,
+          },
+        ),
+      );
+      final responseData = json.decode(response.body);
+      if (responseData['error'] != null) {
+        throw HttpException(responseData['error']['message']);
+      }
+    } catch (error) {
+      throw error;
+    }
   }
 
   Future<void> signUp(String email, String password) async {
