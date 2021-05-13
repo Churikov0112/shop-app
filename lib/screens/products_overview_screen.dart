@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_complete_guide/providers/products.dart';
 import 'package:provider/provider.dart';
 
 import '../widgets/app_drawer.dart';
@@ -7,6 +6,7 @@ import '../widgets/products_grid.dart';
 import '../widgets/badge.dart';
 import '../providers/cart.dart';
 import './cart_screen.dart';
+import '../providers/products.dart';
 
 enum FilterOptions {
   Favorites,
@@ -20,26 +20,20 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showOnlyFavorites = false;
-
-  // чтобы не выполнять много раз инициализацию списка продуктов, введем переменную нижу
   var _isInit = true;
   var _isLoading = false;
 
   @override
   void initState() {
-    //Provider.of<Products>(context, listen: false).fetchAndSetProducts(); //не будет работать, т.к. сначала должен создаться widget
-    //
+    // Provider.of<Products>(context).fetchAndSetProducts(); // WON'T WORK!
     // Future.delayed(Duration.zero).then((_) {
     //   Provider.of<Products>(context).fetchAndSetProducts();
     // });
-    //
     super.initState();
   }
 
   @override
-  void didChangeDependencies() async {
-    // выполняется после полной инициализации виджета но до его запуска
-    // выполняется не один раз, как initState, а очень много раз
+  void didChangeDependencies() {
     if (_isInit) {
       setState(() {
         _isLoading = true;
@@ -52,10 +46,6 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
     }
     _isInit = false;
     super.didChangeDependencies();
-  }
-
-  Future<void> _refreshProducts(BuildContext context) async {
-    await Provider.of<Products>(context, listen: false).fetchAndSetProducts();
   }
 
   @override
@@ -78,21 +68,21 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
               Icons.more_vert,
             ),
             itemBuilder: (_) => [
-              PopupMenuItem(
-                child: Text('Only Favorites'),
-                value: FilterOptions.Favorites,
-              ),
-              PopupMenuItem(
-                child: Text('Show All'),
-                value: FilterOptions.All,
-              ),
-            ],
+                  PopupMenuItem(
+                    child: Text('Only Favorites'),
+                    value: FilterOptions.Favorites,
+                  ),
+                  PopupMenuItem(
+                    child: Text('Show All'),
+                    value: FilterOptions.All,
+                  ),
+                ],
           ),
           Consumer<Cart>(
             builder: (_, cart, ch) => Badge(
-              child: ch,
-              value: cart.itemCount.toString(),
-            ),
+                  child: ch,
+                  value: cart.itemCount.toString(),
+                ),
             child: IconButton(
               icon: Icon(
                 Icons.shopping_cart,
@@ -109,10 +99,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           ? Center(
               child: CircularProgressIndicator(),
             )
-          : RefreshIndicator(
-              onRefresh: () => _refreshProducts(context),
-              child: ProductsGrid(_showOnlyFavorites),
-            ),
+          : ProductsGrid(_showOnlyFavorites),
     );
   }
 }

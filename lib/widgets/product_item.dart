@@ -6,58 +6,59 @@ import '../providers/product.dart';
 import '../providers/cart.dart';
 
 class ProductItem extends StatelessWidget {
+  // final String id;
+  // final String title;
+  // final String imageUrl;
+
+  // ProductItem(this.id, this.title, this.imageUrl);
+
   @override
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
-    return Card(
-      elevation: 10,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
       child: GridTile(
         child: GestureDetector(
+          onTap: () {
+            Navigator.of(context).pushNamed(
+              ProductDetailScreen.routeName,
+              arguments: product.id,
+            );
+          },
           child: Image.network(
             product.imageUrl,
             fit: BoxFit.cover,
           ),
-          onTap: () {
-            Navigator.of(context).pushNamed(ProductDetailScreen.routeName,
-                arguments: product.id);
-          },
         ),
         footer: GridTileBar(
-          leading: Text(
+          backgroundColor: Colors.black87,
+          leading: Consumer<Product>(
+            builder: (ctx, product, _) => IconButton(
+                  icon: Icon(
+                    product.isFavorite ? Icons.favorite : Icons.favorite_border,
+                  ),
+                  color: Theme.of(context).accentColor,
+                  onPressed: () {
+                    product.toggleFavoriteStatus();
+                  },
+                ),
+          ),
+          title: Text(
             product.title,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 17,
-            ),
+            textAlign: TextAlign.center,
           ),
-          title: Consumer<Product>(
-            builder: (ctx, product, child) => IconButton(
-              icon: Icon(
-                  product.isFavorite
-                      ? Icons.favorite
-                      : Icons.favorite_border_sharp,
-                  color: Colors.white),
-              onPressed: () {
-                product.toggleFavoriteStatus();
-              },
-            ),
-          ),
-          backgroundColor: Color.fromRGBO(183, 50, 204, 0.85),
           trailing: IconButton(
-            icon: Icon(Icons.shopping_cart),
+            icon: Icon(
+              Icons.shopping_cart,
+            ),
             onPressed: () {
-              cart.addItem(
-                product.id,
-                product.price,
-                product.title,
-              );
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              ScaffoldMessenger.of(context).showSnackBar(
+              cart.addItem(product.id, product.price, product.title);
+              Scaffold.of(context).hideCurrentSnackBar();
+              Scaffold.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Item\'s been added to cart',
-                    //textAlign: TextAlign.center,
+                    'Added item to cart!',
                   ),
                   duration: Duration(seconds: 2),
                   action: SnackBarAction(
@@ -65,11 +66,11 @@ class ProductItem extends StatelessWidget {
                     onPressed: () {
                       cart.removeSingleItem(product.id);
                     },
-                    textColor: Colors.red,
                   ),
                 ),
               );
             },
+            color: Theme.of(context).accentColor,
           ),
         ),
       ),
